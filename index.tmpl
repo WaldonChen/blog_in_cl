@@ -1,0 +1,16 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset="/>
+		<title>My Blog</title>
+	</head>
+	<body>
+		<h1>My Blog</h1>
+		<!-- tmpl_loop blog-posts -->
+		<div>
+			<h2><a href="/view/?<!-- tmpl_var url-part -->"><!-- tmpl_var title --></a></h2>
+		</div>
+		<!-- /tmpl_loop -->
+        <div style="margin-top: 20px">[<a href="/create/">Create A new Post</a>]</div>
+	</body>
+</html>
