@@ -20,7 +20,8 @@
   (:metaclass persistent-metaclass))
 
 (defmethod initialize-instance :after ((obj blog-post) &key)
-  "If :url-part wasn't non-nil when making the instance, generate it automatically."
+  "If :url-part wasn't non-nil when making the instance,
+generate it automatically."
   (cond ((eq nil (url-part obj))
          (setf (url-part obj) (make-url-part (title obj))))))
 
@@ -30,24 +31,6 @@
     (delete-if #'(lambda (x) (not (or (alphanumericp x) (char= #\- x))))
                (substitute #\- #\Space title))))
 
-; Container for all our blog post
-#|
-(defun init-posts ()
-  (progn
-    (insert-item
-      (make-instance
-        'blog-post
-        :title "Hello blog world"
-        :body "First post!")
-      *blog-posts*)
-    (insert-item
-      (make-instance
-        'blog-post
-        :title "This is fun"
-        :body "common lisp is easy!")
-      *blog-posts*)
-    ))
-|#
 (defun dump-all-post ()
   (loop for blog-post in (nreverse (get-instances-by-range
                                      'blog-post 'timestamp nil nil))
@@ -62,7 +45,9 @@
       (html-template:fill-and-print-template
         #P"index.tmpl"
         (list :blog-posts
-              (loop for blog-post in (nreverse (elephant:get-instances-by-range 'blog-post 'timestamp nil nil))
+              (loop for blog-post in (nreverse
+                                       (get-instances-by-range
+                                         'blog-post 'timestamp nil nil))
                     collect (list :title (title blog-post)
                                   :body (body blog-post)
                                   :url-part (url-part blog-post))))
@@ -70,7 +55,8 @@
 
 (defun generate-blog-post-page (template)
   (let ((url-part (hunchentoot:query-string*)))
-    (with-output-to-string (stream)   ; Create a stream that will give us a string
+    ; Create a stream that will give us a string
+    (with-output-to-string (stream)
       (let ((blog-post (get-instance-by-value 'blog-post 'url-part url-part))
             (html-template:*string-modifier* #'identity))
         (html-template:fill-and-print-template
@@ -92,17 +78,17 @@
             ,@body)
            (t (require-authorization "blog")))))
 
-(defun view-blog-post-page ()
-  (generate-blog-post-page #P"post.tmpl"))
-
 (defun view-page-url-of (url-part)
   (concatenate 'string "/view/?" url-part))
+
+(defun view-blog-post-page ()
+  (generate-blog-post-page #P"post.tmpl"))
 
 (defun save-blog-post ()
   "Read POST data and modify blog post"
   (let ((blog-post
-          (get-instance-by-value 'blog-post
-                                 'url-part (hunchentoot:query-string*))))
+          (get-instance-by-value 'blog-post 'url-part
+                                 (hunchentoot:query-string*))))
     (setf (title blog-post) (hunchentoot:post-parameter "title"))
     (setf (body blog-post) (hunchentoot:post-parameter "body"))
     (setf (url-part blog-post) (make-url-part (title blog-post)))
@@ -136,8 +122,7 @@
       (list (create-regex-dispatcher "^/$" 'generate-index-page)
             (create-regex-dispatcher "^/view/$" 'view-blog-post-page)
             (create-regex-dispatcher "^/edit/$" 'edit-blog-post)
-            (create-regex-dispatcher "^/create/$" 'create-blog-post)
-            ))
+            (create-regex-dispatcher "^/create/$" 'create-blog-post)))
 
 (defun start-blog ()
   ; Open the store where our data is stored
@@ -154,7 +139,6 @@
          (close-store *elephant-store*))))
 
 #|
-
 (defun 404-dispatcher (request)
   '404-page)
 
@@ -163,5 +147,4 @@
 
 (push-end-new '404-dispatcher *dispatch-table*)  ;; make sure the
 dispatcher is at the end of the *dispatch-table*
-
 |#
